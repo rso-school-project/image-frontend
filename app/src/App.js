@@ -64,7 +64,7 @@ function App() {
                         </NavItem>
                     </SideNav.Nav>
                 </SideNav>
-                <main style={{ paddingLeft: "64px" }}>
+                <main style={{ paddingLeft: "64px", height: "100vh", overflowY: "scroll"}}>
                     <Route path="/" exact component={props => <Gallery />} />
                     <Route path="/images" exact component={props => <Gallery />} />
                     <Route path="/shared" component={props => <Gallery shared />} />

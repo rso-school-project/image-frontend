@@ -43,6 +43,45 @@
 
 }
 
+.fullscreen-img-bg {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1500;
+  opacity: 0.85;
+  background-color: black;
+}
+
+.fullscreen-img {
+  position: fixed;
+  bottom: 10vh;
+  right: 10vw;
+  width: 80vw;
+  height: 80vh;
+  z-index: 1501;
+}
+
+.fullscreen-img-controls {
+  position: fixed;
+  top: 10px;
+  right: 0vw;
+  width: 100vw;
+  height: 10vh;
+  z-index: 1502;
+  color: white;
+  font-size: 1.75em;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable :hover {
+  opacity: 0.6;
+}
+
 .grow{
     width: 300px;
     height: 300px;
@@ -64,14 +103,9 @@
   -o-filter: blur(0);
   -ms-filter: blur(0);  
     -ms-filter: blur(0px);
-
-/*filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='0'); */
- 
-  
 }
  
 .grow img:hover {   
-
     -moz-transform: scale(1.5);
     -webkit-transform: scale(1.5);
     -o-transform: scale(1.5);
@@ -82,7 +116,4 @@
   -moz-filter: blur(10px);
   -o-filter: blur(10px);
   -ms-filter: blur(10px);
-
-    
-  
 }
