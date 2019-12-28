@@ -60,7 +60,7 @@ export default class Gallery extends React.Component {
           <div style={{ padding: "2%" }}>
             {images && images.length > 0
               ? images.map((img, i) => {
-                return (<div className="grow m-2 float-left"><img onClick={() => this.showImage(i)} className=" gallery-img" src={img} alt={`img${i}`} /></div>);
+                return (<div key={i} className="grow m-2 float-left"><img onClick={() => this.showImage(i)} className=" gallery-img" src={img} alt={`img${i}`} /></div>);
               })
               : "No images available."
             }
@@ -78,6 +78,11 @@ export default class Gallery extends React.Component {
                 <FontAwesomeIcon onClick={(e) => this.hideImage(e)} icon="times" className="clickable ml-4 mr-4" />
                 <span style={{ border: "1px solid white" }} />
                 <FontAwesomeIcon style={{ color: "red"}} onClick={null} icon="trash" className="clickable ml-4" />
+            </div>
+            <div className="fullscreen-img-description">
+              <b>{images[selectedImage].split("/").slice(-1)[0]}</b>
+              <br/>
+              Description
             </div>
            </React.Fragment>}
         </React.Fragment>

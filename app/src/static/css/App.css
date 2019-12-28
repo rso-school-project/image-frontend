@@ -62,6 +62,7 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+  padding-bottom: 1vh;
 }
 
 .fullscreen-img-controls {
@@ -73,6 +74,16 @@
   z-index: 1502;
   color: white;
   font-size: 1.75em;
+}
+
+.fullscreen-img-description {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 100vw;
+  height: 10vh;
+  z-index: 1502;
+  color: white;
 }
 
 .clickable {
