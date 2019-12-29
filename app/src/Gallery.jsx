@@ -133,7 +133,7 @@ export default class Gallery extends React.Component {
               ? images.map((img, i) => {
                 return (<div key={i} className="grow m-2 float-left"><img onClick={() => this.showImage(i)} className=" gallery-img" src={img} alt={`img${i}`} /></div>);
               })
-              : "No images available."
+              : <p>No images available.</p>
             }
           </div>
 

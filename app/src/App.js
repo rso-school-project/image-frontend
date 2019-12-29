@@ -11,6 +11,7 @@ import '@trendmicro/react-sidenav/dist/react-sidenav.css';
 
 import Gallery from './Gallery';
 import Login from './Login';
+import User from './User';
 
 library.add(faUser, faPowerOff, faImages, faShareAlt, faSignOutAlt);
 
@@ -18,7 +19,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      user: null,
+      user: "timotej123",
     };
   }
 
@@ -99,7 +100,7 @@ class App extends React.Component {
                       <Route path="/" exact component={props => <Gallery />} />
                       <Route path="/images" exact component={props => <Gallery />} />
                       <Route path="/shared" component={props => <Gallery shared />} />
-                      <Route path="/user" component={props => null} />
+                      <Route path="/user" component={props => <User user={user} />} />
                       <Route render={() => <Redirect to="/"/>} />
                     </Switch>
                   </main>
