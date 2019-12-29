@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './static/css/index.css';
+import 'react-tiny-fab/dist/styles.css';
+import 'react-bootstrap-typeahead/css/Typeahead.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 

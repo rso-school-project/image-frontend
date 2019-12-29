@@ -3,8 +3,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faTimes, faChevronLeft, faChevronRight, faShare, faTrash, faComments, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { Fab } from 'react-tiny-fab';
-import 'react-tiny-fab/dist/styles.css';
 import { Modal, Button, Spinner } from 'react-bootstrap';
+import { Typeahead } from 'react-bootstrap-typeahead';
 
 import sample1 from './static/img/sample1.jpg';
 import sample2 from './static/img/sample2.jpg';
@@ -20,6 +20,7 @@ export default class Gallery extends React.Component {
       isImageShown: false,
       selectedImage: null,
       showUploadModal: false,
+      showSharingModal: false,
       isUploading: false,
     };
   }
@@ -73,7 +74,17 @@ export default class Gallery extends React.Component {
     });
   }
 
+  handleOpenSharingModal = () => {
+    this.setState({
+      showSharingModal: true,
+    });
+  }
 
+  handleCloseSharingModal = () => {
+    this.setState({
+      showSharingModal: false,
+    });
+  }
 
   uploadImage = () => {
     let imageInput = document.getElementById('imageFile');
@@ -99,9 +110,36 @@ export default class Gallery extends React.Component {
     }, 1000);
   }
 
+  share = () => {
+    const { usersSharing } = this.state;
+    if (usersSharing) {
+      // TODO: API call.
+    }
+    this.setState({
+      showSharingModal: false,
+    });
+  }
+
+  handleUsersSharingChange = (selectedOptions) => {
+    this.setState({
+      usersSharing: selectedOptions
+    });
+  }
+
   render() {
-    const { images, isImageShown, selectedImage, showUploadModal, uploadError, isUploading } = this.state;
+    const {
+      images,
+      isImageShown,
+      selectedImage,
+      showUploadModal,
+      uploadError,
+      isUploading,
+      showSharingModal,
+      sharingError
+    } = this.state;
     const { shared } = this.props;
+    const sampleUsers = ["tim12", "marko4", "bojannn", "ciril", "xfor2", "babababa", "username123"];
+
     return (
         <React.Fragment>
           {!isImageShown && !shared && !showUploadModal && <Fab
@@ -115,7 +153,7 @@ export default class Gallery extends React.Component {
             </Modal.Header>
             <Modal.Body>
               <p>Please select an image.</p>
-              <input disabled={isUploading} type="file" id="imageFile" accept="image/*" />
+              <input autoFocus disabled={isUploading} type="file" id="imageFile" accept="image/*" />
               <p style={{ color: "red" }}>{uploadError}</p>
             </Modal.Body>
             <Modal.Footer>
@@ -124,6 +162,34 @@ export default class Gallery extends React.Component {
               </Button>
               <Button variant="primary" disabled={isUploading} onClick={this.uploadImage}>
                 {isUploading? <span><Spinner size="sm" animation="grow" />Uploading...</span> : <span>Upload</span>}
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          <Modal style={{ zIndex: 1503 }} show={showSharingModal} onHide={this.handleCloseSharingModal}>
+            <Modal.Header>
+              <Modal.Title>Sharing options</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>Please select the users.</p>
+              <Typeahead
+                autoFocus
+                clearButton
+                defaultSelected={sampleUsers.slice(0, 2)}
+                multiple
+                options={sampleUsers}
+                placeholder="Select users..."
+                id="usersSharing"
+                onChange={this.handleUsersSharingChange}
+              />
+              <p style={{ color: "red" }}>{sharingError}</p>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" disabled={isUploading} onClick={this.handleCloseSharingModal}>
+                Close
+              </Button>
+              <Button variant="primary" disabled={isUploading} onClick={this.share}>
+                Save
               </Button>
             </Modal.Footer>
           </Modal>
@@ -142,7 +208,7 @@ export default class Gallery extends React.Component {
             <img className="fullscreen-img" src={images[selectedImage]} alt={`img${selectedImage}`} />
             <div className="fullscreen-img-controls">
                 <FontAwesomeIcon icon="comments" className="clickable mr-4" />
-                <FontAwesomeIcon icon="share" className="clickable mr-4" />
+                {!shared && <FontAwesomeIcon onClick={this.handleOpenSharingModal} icon="share" className="clickable mr-4" />}
                 <span style={{ border: "1px solid white" }} />
                 <FontAwesomeIcon onClick={(e) => this.setImage(e, selectedImage-1)} icon="chevron-left" className={selectedImage > 0 ? "clickable ml-4" : "text-muted ml-4"} />
                 <FontAwesomeIcon onClick={(e) => this.setImage(e, selectedImage+1)} icon="chevron-right" className={selectedImage < images.length - 1 ? "clickable" : "text-muted"} />
