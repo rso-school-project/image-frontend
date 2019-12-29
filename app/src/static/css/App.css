@@ -54,6 +54,20 @@
   transform: translate(-50%, -50%);
 }
 
+.comments-container {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1505;
+  opacity: 1;
+  background-color: #f6f6f6;
+  padding: 5%;
+  padding-top: 30px;
+  overflow-y: scroll;
+}
+
 .gallery-img {
   cursor: pointer;
   width: 20%;

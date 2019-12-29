@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faTimes, faChevronLeft, faChevronRight, faShare, faTrash, faComments, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { Fab } from 'react-tiny-fab';
-import { Modal, Button, Spinner } from 'react-bootstrap';
+import { Modal, Button, Spinner, Toast } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 
 import sample1 from './static/img/sample1.jpg';
@@ -22,6 +22,7 @@ export default class Gallery extends React.Component {
       showUploadModal: false,
       showSharingModal: false,
       isUploading: false,
+      showComments: false,
     };
   }
 
@@ -86,6 +87,18 @@ export default class Gallery extends React.Component {
     });
   }
 
+  handleOpenComments = () => {
+    this.setState({
+      showComments: true,
+    });
+  }
+
+  handleCloseComments = () => {
+    this.setState({
+      showComments: false,
+    });
+  }
+
   uploadImage = () => {
     let imageInput = document.getElementById('imageFile');
     if (!imageInput.files || imageInput.files.length <= 0) {
@@ -135,7 +148,8 @@ export default class Gallery extends React.Component {
       uploadError,
       isUploading,
       showSharingModal,
-      sharingError
+      sharingError,
+      showComments
     } = this.state;
     const { shared } = this.props;
     const sampleUsers = ["tim12", "marko4", "bojannn", "ciril", "xfor2", "babababa", "username123"];
@@ -207,7 +221,7 @@ export default class Gallery extends React.Component {
             <div className="fullscreen-img-bg"></div>
             <img className="fullscreen-img" src={images[selectedImage]} alt={`img${selectedImage}`} />
             <div className="fullscreen-img-controls">
-                <FontAwesomeIcon icon="comments" className="clickable mr-4" />
+                <FontAwesomeIcon onClick={this.handleOpenComments} icon="comments" className="clickable mr-4" />
                 {!shared && <FontAwesomeIcon onClick={this.handleOpenSharingModal} icon="share" className="clickable mr-4" />}
                 <span style={{ border: "1px solid white" }} />
                 <FontAwesomeIcon onClick={(e) => this.setImage(e, selectedImage-1)} icon="chevron-left" className={selectedImage > 0 ? "clickable ml-4" : "text-muted ml-4"} />
@@ -221,6 +235,67 @@ export default class Gallery extends React.Component {
               <br/>
               Description
             </div>
+
+            {showComments && <div className="comments-container">
+
+              <Toast style={{ maxWidth: "100%"}}>
+                <Toast.Header closeButton={false}>
+                  <strong className="mr-auto">user123</strong>
+                  <small>just now</small>
+                </Toast.Header>
+                <Toast.Body>See? Just like this.</Toast.Body>
+              </Toast>
+              <Toast style={{ maxWidth: "100%"}}>
+                <Toast.Header closeButton={false}>
+                  <strong className="mr-auto">user123</strong>
+                  <small>just now</small>
+                </Toast.Header>
+                <Toast.Body>See? Just like this.</Toast.Body>
+              </Toast><Toast style={{ maxWidth: "100%"}}>
+                <Toast.Header closeButton={false}>
+                  <strong className="mr-auto">user123</strong>
+                  <small>just now</small>
+                </Toast.Header>
+                <Toast.Body>See? Just like this.</Toast.Body>
+              </Toast><Toast style={{ maxWidth: "100%"}}>
+                <Toast.Header closeButton={false}>
+                  <strong className="mr-auto">user123</strong>
+                  <small>just now</small>
+                </Toast.Header>
+                <Toast.Body>See? Just like this.</Toast.Body>
+              </Toast><Toast style={{ maxWidth: "100%"}}>
+                <Toast.Header closeButton={false}>
+                  <strong className="mr-auto">user123</strong>
+                  <small>just now</small>
+                </Toast.Header>
+                <Toast.Body>See? Just like this.</Toast.Body>
+              </Toast><Toast style={{ maxWidth: "100%"}}>
+                <Toast.Header closeButton={false}>
+                  <strong className="mr-auto">user123</strong>
+                  <small>just now</small>
+                </Toast.Header>
+                <Toast.Body>See? Just like this.</Toast.Body>
+              </Toast><Toast style={{ maxWidth: "100%"}}>
+                <Toast.Header closeButton={false}>
+                  <strong className="mr-auto">user123</strong>
+                  <small>just now</small>
+                </Toast.Header>
+                <Toast.Body>See? Just like this.</Toast.Body>
+              </Toast>
+
+              <br/><br/>
+
+              <input style={{ width: "100%" }} autoFocus type="text" id="comment" placeholder="Enter a comment" />
+
+              <br/><br/>
+
+              <Button variant="primary" className="float-right mb-3" onClick={this.postComment}>
+                Post
+              </Button>
+              <Button variant="secondary" className="float-right mb-3 mr-2" onClick={this.handleCloseComments}>
+                Close
+              </Button>
+            </div>}
            </React.Fragment>}
         </React.Fragment>
     );
