@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-frontend
+#  namespace: rso
+  labels:
+    app: image-frontend
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-frontend
+  template:
+    metadata:
+      labels:
+        app: image-frontend
+    spec:
+      volumes:
+        - name: google-cloud-key
+          secret:
+            secretName: google-cloud-key
+      containers:
+      - image: timotejgale/image-frontend
+        name: image-frontend
+        volumeMounts:
+          - name: google-cloud-key
+            mountPath: /var/secrets/google
+        env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /var/secrets/google/key.json
+          - name: MODULE_NAME
+            value: user_handler
+          - name: PORT
+            value: "80"
+          - name: ETCD_HOST_URL
+            value: "etcd"
+          - name: ETCD_HOST_PORT
+            value: "2379"
+          - name: DB_URL
+            value: "10.32.192.3"
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: db-user-pass
+                key: DB_USERNAME
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-user-pass
+                key: DB_PASSWORD
+        ports:
+          - containerPort: 80
+            name: server
+            protocol: TCP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-frontend-service
+#  namespace: rso
+  labels:
+    app: image-frontend
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: server
+  selector:
+    app: image-frontend
