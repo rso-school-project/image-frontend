@@ -1,19 +1,24 @@
 import React from 'react';
-import { Button, Form, Row, Col } from 'react-bootstrap';
+import { Button, Form, Row, Col, Spinner } from 'react-bootstrap';
 
+import { config } from "./config";
 import logo from './static/img/logo.png';
 
 export default class Login extends React.Component {
   constructor(props) {
     super(props);
+
+    this.abortController = new AbortController();
+
     this.state = {
       loginError: "",
       username: "",
       password: "",
+      isLoading: false,
     };
   }
 
-  componentDidMount() {
+  componentWillUnmount() {
 
   }
 
@@ -26,8 +31,36 @@ export default class Login extends React.Component {
       return;
     }
 
-    // TODO: API call
-    this.props.handleSetUser("user1");
+    this.setState({ isLoading: true });
+
+    const data = { username: username, password: password };
+
+    fetch(config.host + "user-handler/api/v1/login/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data),
+      signal: this.abortController.signal
+    })
+    .then(response => {
+      if (response.status === 200) {
+        return response.json();
+      } else {
+        if (response.status === 404)
+          this.setState({ loginError: "Username or password is incorrect.", isLoading: false })
+        else
+          this.setState({ loginError: "Service currently unavailable.", isLoading: false })
+      }
+    })
+    .then(data => {
+      if (data) this.props.handleSetUser(data);
+    })
+    .catch(error => {
+      console.log(error);
+      this.setState({ loginError: "Service currently unavailable.", isLoading: false })
+    });
+
   }
 
   setValue = (e) => {
@@ -37,7 +70,7 @@ export default class Login extends React.Component {
   }
 
   render() {
-    const { loginError } = this.state;
+    const { loginError, isLoading } = this.state;
     return (
       <div className="login-form-container">
         <div className="login-form">
@@ -66,8 +99,9 @@ export default class Login extends React.Component {
               onClick={this.login}
               className="float-right"
               variant="dark"
+              disabled={isLoading}
             >
-              Log in
+              {isLoading? <span><Spinner size="sm" animation="grow" />Logging in...</span> : <span>Log in</span>}
             </Button>
           </Form>
         </div>
