@@ -19,7 +19,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      user: null,
+      user: null,//{ username: "timotej", id: 1 },
     };
   }
 
@@ -97,9 +97,9 @@ class App extends React.Component {
                   </SideNav>
                   <main style={{ paddingLeft: "64px", height: "100vh", overflowY: "scroll"}}>
                     <Switch>
-                      <Route path="/" exact component={props => <Gallery />} />
-                      <Route path="/images" exact component={props => <Gallery />} />
-                      <Route path="/shared" component={props => <Gallery shared />} />
+                      <Route path="/" exact component={props => <Gallery user={user} />} />
+                      <Route path="/images" exact component={props => <Gallery user={user} />} />
+                      <Route path="/shared" component={props => <Gallery user={user} shared />} />
                       <Route path="/user" component={props => <User user={user} />} />
                       <Route render={() => <Redirect to="/"/>} />
                     </Switch>

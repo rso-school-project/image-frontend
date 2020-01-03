@@ -6,15 +6,16 @@ import { Fab } from 'react-tiny-fab';
 import { Modal, Button, Spinner, Toast } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 
-import sample1 from './static/img/sample1.jpg';
-import sample2 from './static/img/sample2.jpg';
-import sample3 from './static/img/sample3.jpg';
+import { config } from "./config";
 
 library.add(faTimes, faChevronLeft, faChevronRight, faShare, faTrash, faComments, faPlus);
 
 export default class Gallery extends React.Component {
   constructor(props) {
     super(props);
+
+    this.abortController = new AbortController();
+
     this.state = {
       images: [],
       isImageShown: false,
@@ -23,16 +24,49 @@ export default class Gallery extends React.Component {
       showSharingModal: false,
       isUploading: false,
       showComments: false,
+      allUsers: [],
     };
   }
 
   componentDidMount() {
+    fetch(config.host + "user-handler/api/v1/users/", {
+      method: "GET",
+      signal: this.abortController.signal
+    })
+    .then(response => {
+      if (response.status === 200) {
+        return response.json();
+      }
+    })
+    .then(data => {
+      if (data) {
+        this.setState({ allUsers: data.filter(x => x.username !== this.props.user.username) });
+      }
+    })
+    .catch(error => {
+      console.log(error);
+    });
+
     if (this.props.shared) {
 
     }
     else {
-      this.setState({
-        images: [sample1, sample2, sample3, sample1, sample2, sample3, sample1, sample2, sample3],
+      fetch(config.host + `image-handler/api/v1/images/user/${this.props.user.id}`, {
+        method: "GET",
+        signal: this.abortController.signal
+      })
+      .then(response => {
+        if (response.status === 200) {
+          return response.json();
+        }
+      })
+      .then(data => {
+        if (data) {
+          this.setState({ images: data });
+        }
+      })
+      .catch(error => {
+        console.log(error);
       });
     }
   }
@@ -48,6 +82,31 @@ export default class Gallery extends React.Component {
     e.preventDefault();
     this.setState({
         isImageShown: false,
+    });
+  }
+
+  deleteImage = (e) => {
+    e.preventDefault();
+    const { images, selectedImage } = this.state;
+
+    fetch(config.host + `image-upload/api/v1/images/${images[selectedImage].id}`, {
+      method: "DELETE",
+      signal: this.abortController.signal
+    })
+    .then(response => {
+      if (response.status === 200) {
+        return response.json();
+      }
+    })
+    .then(data => {
+      if (data) {
+        this.setState((prev) => {
+          return { images: prev.images.filter(x => x.id !== data.id), isImageShown: false }
+        });
+      }
+    })
+    .catch(error => {
+      console.log(error);
     });
   }
 
@@ -78,12 +137,14 @@ export default class Gallery extends React.Component {
   handleOpenSharingModal = () => {
     this.setState({
       showSharingModal: true,
+      usersSharing: null,
     });
   }
 
   handleCloseSharingModal = () => {
     this.setState({
       showSharingModal: false,
+      usersSharing: null,
     });
   }
 
@@ -116,11 +177,38 @@ export default class Gallery extends React.Component {
 
     this.setState({ isUploading: true, uploadError: "" });
 
-    // TODO: API call.
-    setTimeout(() => {
-      // TODO: Get the new list of images.
-      this.setState({ isUploading: false, showUploadModal: false });
-    }, 1000);
+    //const data = { user_id: this.props.user.id, file: imageInput.files[0] };
+
+    let data = new FormData();
+    data.append("file", imageInput.files[0]);
+    data.append("user_id", this.props.user.id);
+
+    fetch(config.host + "image-upload/api/v1/images/", {
+      method: "POST",
+      body: data,
+      signal: this.abortController.signal
+    })
+    .then(response => {
+      if (response.status === 200) {
+        return response.json();
+      } else {
+        if (response.status === 400)
+          this.setState({ uploadError: "The provided file is not an image.", isUploading: false })
+        else
+          this.setState({ uploadError: "Service currently unavailable.", isUploading: false })
+      }
+    })
+    .then(data => {
+      if (data) {
+        this.setState((prev) => {
+          return { isUploading: false, showUploadModal: false, images: prev.images.concat([data])}
+        });
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      this.setState({ uploadError: "Service currently unavailable.", isUploading: false })
+    });
   }
 
   share = () => {
@@ -139,6 +227,10 @@ export default class Gallery extends React.Component {
     });
   }
 
+  getImgSrc = (img) => {
+    return `https://storage.googleapis.com/super_skrivni_bozickov_zaklad/${img.id}${img.file_hash}`;
+  }
+
   render() {
     const {
       images,
@@ -149,10 +241,10 @@ export default class Gallery extends React.Component {
       isUploading,
       showSharingModal,
       sharingError,
-      showComments
+      showComments,
+      allUsers
     } = this.state;
     const { shared } = this.props;
-    const sampleUsers = ["tim12", "marko4", "bojannn", "ciril", "xfor2", "babababa", "username123"];
 
     return (
         <React.Fragment>
@@ -189,9 +281,10 @@ export default class Gallery extends React.Component {
               <Typeahead
                 autoFocus
                 clearButton
-                defaultSelected={sampleUsers.slice(0, 2)}
+                defaultSelected={[]}
                 multiple
-                options={sampleUsers}
+                labelKey={"username"}
+                options={allUsers}
                 placeholder="Select users..."
                 id="usersSharing"
                 onChange={this.handleUsersSharingChange}
@@ -211,7 +304,7 @@ export default class Gallery extends React.Component {
           <div style={{ padding: "2%" }}>
             {images && images.length > 0
               ? images.map((img, i) => {
-                return (<div key={i} className="grow m-2 float-left"><img onClick={() => this.showImage(i)} className=" gallery-img" src={img} alt={`img${i}`} /></div>);
+                return (<div key={i} className="grow m-2 float-left"><img onClick={() => this.showImage(i)} className=" gallery-img" src={this.getImgSrc(img)} alt={img.file_name} /></div>);
               })
               : <p>No images available.</p>
             }
@@ -219,7 +312,7 @@ export default class Gallery extends React.Component {
 
           {isImageShown && <React.Fragment>
             <div className="fullscreen-img-bg"></div>
-            <img className="fullscreen-img" src={images[selectedImage]} alt={`img${selectedImage}`} />
+            <img className="fullscreen-img" src={this.getImgSrc(images[selectedImage])} alt={"N/A"} />
             <div className="fullscreen-img-controls">
                 <FontAwesomeIcon onClick={this.handleOpenComments} icon="comments" className="clickable mr-4" />
                 {!shared && <FontAwesomeIcon onClick={this.handleOpenSharingModal} icon="share" className="clickable mr-4" />}
@@ -228,10 +321,10 @@ export default class Gallery extends React.Component {
                 <FontAwesomeIcon onClick={(e) => this.setImage(e, selectedImage+1)} icon="chevron-right" className={selectedImage < images.length - 1 ? "clickable" : "text-muted"} />
                 <FontAwesomeIcon onClick={(e) => this.hideImage(e)} icon="times" className="clickable ml-4 mr-4" />
                 <span style={{ border: "1px solid white" }} />
-                <FontAwesomeIcon style={{ color: "red"}} onClick={null} icon="trash" className="clickable ml-4" />
+                <FontAwesomeIcon style={{ color: "red"}} onClick={(e) => this.deleteImage(e)} icon="trash" className="clickable ml-4" />
             </div>
             <div className="fullscreen-img-description">
-              <b>{images[selectedImage].split("/").slice(-1)[0]}</b>
+              <b>{images[selectedImage].file_name || ""}</b>
               <br/>
               Description
             </div>
