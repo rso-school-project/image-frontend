@@ -284,6 +284,7 @@ export default class Gallery extends React.Component {
     data.append("user_id", this.props.user.id);
 
     fetch(config.host + "image-upload/api/v1/images", {
+    //fetch("http://localhost:8001/api/v1/images", {
       method: "POST",
       body: data,
       headers: {
@@ -507,9 +508,9 @@ export default class Gallery extends React.Component {
                 <FontAwesomeIcon style={{ color: "red"}} onClick={(e) => this.deleteImage(e)} icon="trash" className="clickable ml-4" />
             </div>
             <div className="fullscreen-img-description">
-              <b>{images[selectedImage].file_name || ""}</b>
+              <b>{images[selectedImage].file_name || "N/A"}</b>
               <br/>
-              Description.
+              Tags: {images[selectedImage].tags || "N/A"}
             </div>
 
             {showComments && <div className="comments-container">
